@@ -18,6 +18,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final FirestoreService firestoreService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final JwtService jwtService;
 
     @Override
     public AuthResponse register(SignupRequest request) {
@@ -43,14 +44,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse login(LoginRequest request) {
+    public String login(LoginRequest request) {
         try {
             User user = firestoreService.getUserByUsername(request.getUsername());
             if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
                 throw new IllegalArgumentException("Invalid credentials.");
             }
-
-            return new AuthResponse("Login successful (JWT coming soon).");
+            return jwtService.generateToken(request.getUsername());
         } catch (Exception e) {
             throw new RuntimeException("Login failed: " + e.getMessage());
         }
