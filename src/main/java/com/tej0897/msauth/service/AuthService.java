@@ -7,5 +7,5 @@ import com.tej0897.msauth.dto.SignupRequest;
 public interface AuthService {
     AuthResponse register(SignupRequest request);
 
-    AuthResponse login(LoginRequest request);
+    String login(LoginRequest request);
 }

@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -18,6 +17,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final FirestoreService firestoreService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final JwtService jwtService;
 
     @Override
     public AuthResponse register(SignupRequest request) {
@@ -33,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
                 throw new IllegalArgumentException("Email already exists");
             }
 
-            User user = User.builder().username(request.getUsername()).email(request.getEmail()).passwordHash(passwordEncoder.encode(request.getPassword())).build();
+            User user = User.builder().id(java.util.UUID.randomUUID()).username(request.getUsername()).email(request.getEmail()).passwordHash(passwordEncoder.encode(request.getPassword())).build();
             String updatedTime = firestoreService.saveUser(user);
             log.info("saved user at {} ", updatedTime);
             return new AuthResponse("User registered successfully.");
@@ -43,14 +43,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse login(LoginRequest request) {
+    public String login(LoginRequest request) {
         try {
             User user = firestoreService.getUserByUsername(request.getUsername());
             if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
                 throw new IllegalArgumentException("Invalid credentials.");
             }
-
-            return new AuthResponse("Login successful (JWT coming soon).");
+            return jwtService.generateToken(user.getUsername(), user.getId());
         } catch (Exception e) {
             throw new RuntimeException("Login failed: " + e.getMessage());
         }
