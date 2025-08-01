@@ -12,6 +12,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Base64;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -27,9 +28,8 @@ public class JwtService {
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String username) {
-        return Jwts.builder().setSubject(username).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day expiry
-                .signWith(secretKey).compact();
+    public String generateToken(String username, UUID userId) {
+        return Jwts.builder().setSubject(username).claim("userId", userId.toString()).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + 86400000)).signWith(secretKey).compact();
     }
 
     public boolean validateToken(String token) {
@@ -43,5 +43,9 @@ public class JwtService {
 
     public String getUsernameFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public String getUserIdFromToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().get("userId", String.class);
     }
 }

@@ -1,10 +1,10 @@
 package com.tej0897.msauth.entity;
 
-import com.google.cloud.firestore.annotation.DocumentId;
 import com.google.cloud.firestore.annotation.ServerTimestamp;
 import lombok.*;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -12,10 +12,14 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class User {
-    @DocumentId
-    private String id;
+
+    @Builder.Default
+    private UUID id = UUID.randomUUID();
+
     private String username;
+
     private String email;
+
     private String passwordHash;
 
     @ServerTimestamp

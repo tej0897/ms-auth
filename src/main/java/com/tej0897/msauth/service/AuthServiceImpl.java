@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -34,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
                 throw new IllegalArgumentException("Email already exists");
             }
 
-            User user = User.builder().username(request.getUsername()).email(request.getEmail()).passwordHash(passwordEncoder.encode(request.getPassword())).build();
+            User user = User.builder().id(java.util.UUID.randomUUID()).username(request.getUsername()).email(request.getEmail()).passwordHash(passwordEncoder.encode(request.getPassword())).build();
             String updatedTime = firestoreService.saveUser(user);
             log.info("saved user at {} ", updatedTime);
             return new AuthResponse("User registered successfully.");
@@ -50,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
             if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
                 throw new IllegalArgumentException("Invalid credentials.");
             }
-            return jwtService.generateToken(request.getUsername());
+            return jwtService.generateToken(user.getUsername(), user.getId());
         } catch (Exception e) {
             throw new RuntimeException("Login failed: " + e.getMessage());
         }
