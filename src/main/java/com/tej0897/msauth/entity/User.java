@@ -1,32 +1,26 @@
 package com.tej0897.msauth.entity;
 
-import jakarta.persistence.*;
+import com.google.cloud.firestore.annotation.DocumentId;
+import com.google.cloud.firestore.annotation.ServerTimestamp;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.Date;
 
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "users")
 public class User {
-
-    @Id
-    @GeneratedValue
-    private UUID id;
-
-    @Column(nullable = false, unique = true)
+    @DocumentId
+    private String id;
     private String username;
-
-    @Column(nullable = false, unique = true)
     private String email;
-
-    @Column(nullable = false)
     private String passwordHash;
 
-    private LocalDateTime createdAt;
+    @ServerTimestamp
+    private Date createdAt;
+
+    @ServerTimestamp
+    private Date updatedAt;
 }
